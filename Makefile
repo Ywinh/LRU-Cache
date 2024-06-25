@@ -2,20 +2,20 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -std=c++11 -Iinclude -Ibuild/install/include/libcuckoo
+CXXFLAGS = -std=c++11 -Iinclude -Ibuild/install/include/libcuckoo 
 
 # Source and include directories
 INCLUDE_DIR = include
 SRC_DIR = src
 
 # Source files
-SRCS = $(SRC_DIR)/testList.cpp
-
+SRCS =  $(SRC_DIR)/lru_single.cpp \
+		$(SRC_DIR)/testList.cpp
 # Object files
 OBJS = $(SRCS:.cpp=.o)
 
 # Executable
-TARGET = testList
+TARGET = out
 
 # Default rule to build the executable
 all: $(TARGET)

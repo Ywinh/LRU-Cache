@@ -16,12 +16,66 @@ class lru_cache
 {
 public:
     lru_cache(size_t capacity):capacity(capacity),lru() {}
-    ~lru_cache();
+    ~lru_cache(){
+        // lru.~List();
+        // Table.clear();
+    }
+
+    ValueType get(KeyType key){
+        Node<KeyType,ValueType>* t = get_node(key);
+        if(t){
+            return t->value;
+        }else{
+            std::cout<<"Key "<<key<<" not found"<<std::endl;
+            return ValueType();
+            // throw std::runtime_error("Key not found");
+        }
+    }
+
+    void put(KeyType key, ValueType value){
+        // if key already in table, update value, then promote
+        // if key not exsit, insert
+        Node<KeyType,ValueType>* t = get_node(key);
+        if(t){
+            t->value = value;
+            lru.move_to_front(t);
+        }else{
+            // check size
+            if(lru.get_size()+1 > capacity){
+                Node<KeyType,ValueType>* back_node = lru.end(); 
+                Table.erase(back_node->key);
+                lru.pop_back();
+            }
+            lru.push_front(key,value);
+            Table.insert(key,lru.begin());
+        }
+    }
+
+    size_t size(){
+        return lru.get_size();
+    }
 
 private:
     size_t capacity;
     List<KeyType,ValueType> lru;
-    libcuckoo::cuckoohash_map<KeyType, ValueType> Table;
+    libcuckoo::cuckoohash_map<KeyType, Node<KeyType,ValueType>*> Table;
+
+    Node<KeyType,ValueType>* get_node(KeyType key){
+        Node<KeyType,ValueType>* t;
+        if(Table.find(key,t)){
+            return t;
+        }else{
+            return nullptr;
+        }
+    }
+
+    // just touch and move
+    void touch(KeyType key){
+        Node<KeyType,ValueType>*t = get_node(key);
+        if(t == nullptr)
+            return
+        lru.move_to_front(t);
+    }
 };
 
 
@@ -49,6 +103,8 @@ public:
         delete dummy;
     }
 
+    // need a clear?
+
     void push_front(const KeyType& key, const ValueType& value){
         Node<KeyType, ValueType>* node = new Node<KeyType, ValueType>(key,value);
         insert_to_head(node);
@@ -69,6 +125,13 @@ public:
         delete node;
     }
 
+    void pop_back(){
+        Node<KeyType, ValueType>* node = dummy->prev;
+        remove(node);
+        size --;
+        delete node;
+    }
+
     size_t get_size(){
         return size;
     }
@@ -78,6 +141,10 @@ public:
     }
 
     Node<KeyType, ValueType>* end() const {
+        return dummy->prev;
+    }
+
+    Node<KeyType, ValueType>* dummy_() const {
         return dummy;
     }
 

@@ -4,14 +4,14 @@
 template<typename KeyType, typename ValueType>
 void print_list(const List<KeyType, ValueType>& list) {
     Node<KeyType, ValueType>* current = list.begin();
-    while (current != list.end()) {
+    while (current != list.dummy_()) {
         std::cout << "(" << current->key << ", " << current->value << ") ";
         current = current->next;
     }
     std::cout << std::endl;
 }
 
-int main() {
+int test_list() {
     List<int, std::string> list;
 
     // Test pushing elements
@@ -43,7 +43,7 @@ int main() {
     print_list(list);
 
     // Test moving the last element to front
-    Node<int, std::string>* last_node = list.end()->prev; // Get last element
+    Node<int, std::string>* last_node = list.dummy_()->prev; // Get last element
     list.move_to_front(last_node);
 
     std::cout << "After moving last element to front:" << std::endl;
