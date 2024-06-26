@@ -2,6 +2,7 @@
 #define _LRU_CACHE_HPP
 
 #include<iostream>
+#include<mutex>
 #include "../build/install/include/libcuckoo/cuckoohash_map.hh"
 
 // Forward declaration of List and Node
@@ -22,6 +23,9 @@ public:
     }
 
     ValueType get(KeyType key){
+        // 使用std::lock_guard来管理std::mutex的锁定
+        std::lock_guard<std::mutex> lock(mtx);
+
         Node<KeyType,ValueType>* t = get_node(key);
         if(t){
             return t->value;
@@ -35,6 +39,9 @@ public:
     void put(KeyType key, ValueType value){
         // if key already in table, update value, then promote
         // if key not exsit, insert
+        // 使用std::lock_guard来管理std::mutex的锁定
+        std::lock_guard<std::mutex> lock(mtx);
+
         Node<KeyType,ValueType>* t = get_node(key);
         if(t){
             t->value = value;
@@ -52,6 +59,7 @@ public:
     }
 
     size_t size(){
+        // when in multithread should other thread call this func?
         return lru.get_size();
     }
 
@@ -59,6 +67,7 @@ private:
     size_t capacity;
     List<KeyType,ValueType> lru;
     libcuckoo::cuckoohash_map<KeyType, Node<KeyType,ValueType>*> Table;
+    std::mutex mtx;
 
     Node<KeyType,ValueType>* get_node(KeyType key){
         Node<KeyType,ValueType>* t;

@@ -90,12 +90,12 @@ void test_large_number_of_operations() {
 }
 
 
-int main() {
-    test_basic_operations();
-    test_update_value();
-    test_edge_cases();
-    test_large_number_of_operations();
+// int main() {
+//     test_basic_operations();
+//     test_update_value();
+//     test_edge_cases();
+//     test_large_number_of_operations();
 
-    std::cout << "All tests passed!\n";
-    return 0;
-}
+//     std::cout << "All tests passed!\n";
+//     return 0;
+// }

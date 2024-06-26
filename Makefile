@@ -10,7 +10,8 @@ SRC_DIR = src
 
 # Source files
 SRCS =  $(SRC_DIR)/lru_single.cpp \
-		$(SRC_DIR)/testList.cpp
+		$(SRC_DIR)/testList.cpp \
+		$(SRC_DIR)/lru_multi.cpp
 # Object files
 OBJS = $(SRCS:.cpp=.o)
 
