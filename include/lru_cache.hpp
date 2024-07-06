@@ -17,10 +17,8 @@ class lru_cache
 {
 public:
     lru_cache(size_t capacity):capacity(capacity),lru() {}
-    ~lru_cache(){
-        // lru.~List();
-        // Table.clear();
-    }
+    
+    //采用缺省析构函数
 
     ValueType get(KeyType key){
         // 使用std::lock_guard来管理std::mutex的锁定
@@ -30,7 +28,7 @@ public:
         if(t){
             return t->value;
         }else{
-            std::cout<<"Key "<<key<<" not found"<<std::endl;
+            // std::cout<<"Key "<<key<<" not found"<<std::endl;
             return ValueType();
             // throw std::runtime_error("Key not found");
         }
@@ -135,10 +133,7 @@ public:
     }
 
     void pop_back(){
-        Node<KeyType, ValueType>* node = dummy->prev;
-        remove(node);
-        size --;
-        delete node;
+        pop(dummy->prev);
     }
 
     size_t get_size(){
