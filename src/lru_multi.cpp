@@ -3,7 +3,7 @@
 #include <vector>
 #include <atomic>
 #include <cassert>
-#include "lru_cache.hpp"  // 假设这是您提供的头文件
+#include "../include/lru_cache.hpp"  // 假设这是您提供的头文件
 
 const int num_threads = 4;  // 定义测试的线程数
 const int operations_per_thread = 1000;  // 每个线程的操作次数

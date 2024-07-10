@@ -3,7 +3,7 @@
 #include <string>
 #include <random>
 #include <cstdint>
-#include "lru_cache.hpp"  // 你实现的LRU缓存类
+#include "../include/lru_cache.hpp"  // 你实现的LRU缓存类
 
 // 生成测试数据的函数
 // key is 8 bytes, value is 16 bytes
@@ -32,6 +32,7 @@ static void BM_LRUCache_Insert(benchmark::State& state) {
 
     for (auto _ : state) {
         for (const auto& kv : test_data) {
+            // std::cout<<kv.first<<std::endl;
             cache.put(kv.first, kv.second);
         }
     }
@@ -57,6 +58,6 @@ static void BM_LRUCache_Get(benchmark::State& state) {
         }
     }
 }
-// BENCHMARK(BM_LRUCache_Get);
+BENCHMARK(BM_LRUCache_Get);
 
-// BENCHMARK_MAIN();
+BENCHMARK_MAIN();

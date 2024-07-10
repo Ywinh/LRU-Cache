@@ -1,6 +1,6 @@
-#include "lru_cache.hpp"
 #include <iostream>
 #include <cassert>
+#include "../include/lru_cache.hpp"
 
 void test_basic_operations() {
     lru_cache<int, std::string> cache(3);

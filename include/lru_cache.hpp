@@ -20,7 +20,7 @@ public:
     
     //采用缺省析构函数
 
-    ValueType get(KeyType key){
+    ValueType get(const KeyType& key){
         // 使用std::lock_guard来管理std::mutex的锁定
         std::lock_guard<std::mutex> lock(mtx);
 
@@ -34,7 +34,7 @@ public:
         }
     }
 
-    void put(KeyType key, ValueType value){
+    void put(const KeyType& key, const ValueType& value){
         // if key already in table, update value, then promote
         // if key not exsit, insert
         // 使用std::lock_guard来管理std::mutex的锁定
@@ -67,9 +67,11 @@ private:
     libcuckoo::cuckoohash_map<KeyType, Node<KeyType,ValueType>*> Table;
     std::mutex mtx;
 
-    Node<KeyType,ValueType>* get_node(KeyType key){
+    /* return nullptr if not found */
+    Node<KeyType,ValueType>* get_node(const KeyType& key){
         Node<KeyType,ValueType>* t;
         if(Table.find(key,t)){
+            lru.move_to_front(t);
             return t;
         }else{
             return nullptr;
@@ -77,7 +79,7 @@ private:
     }
 
     // just touch and move
-    void touch(KeyType key){
+    void touch(const KeyType& key){
         Node<KeyType,ValueType>*t = get_node(key);
         if(t == nullptr)
             return
