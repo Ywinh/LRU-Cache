@@ -11,6 +11,8 @@
 #define EVPOOL_SIZE 16
 #define CACHE_LIMIT 1000
 #define SAMPLES 5
+#define INTERVAL_THERSHOLD 100
+
 
 // pool only store key
 template<typename KeyType>
@@ -63,6 +65,7 @@ private:
     libcuckoo::cuckoohash_map<KeyType, entry<KeyType,ValueType>*> Table;
     evictionPoolEntry<KeyType> EvictionPoolLRU[EVPOOL_SIZE];
     std::vector<KeyType> existkey;
+    int time_interval;
     bool firstSample;
 
     entry<KeyType,ValueType>* getEntry(const KeyType& key){
@@ -77,6 +80,18 @@ private:
     void PoolAlloc();
     std::vector<KeyType> getRandomKey();
 
+    void updateTimeInterval(){
+        //倒序遍历
+        for(int i=EVPOOL_SIZE-1;i>=0;i--){
+            if(EvictionPoolLRU[i].key == KeyType()) continue;
+            KeyType out = EvictionPoolLRU[i].key;
+            entry<KeyType, ValueType>* entryToRemove = getEntry(out);
+            entry<KeyType, ValueType>* firstEt = getEntry(EvictionPoolLRU[0].key);
+            time_interval = abs(entryToRemove->time-firstEt->time);
+            break;
+        }
+    }
+
     // 只有key不存在才会insert，因此不会出现key重复
     void insert(const KeyType& key, const ValueType& val){
         //entry 构造时会自动写入时间戳
@@ -87,7 +102,7 @@ private:
         size++;
     }
 
-        // 更新时从键空间随机选择N个key，分别计算它们的空闲时间idle
+    // 更新时从键空间随机选择N个key，分别计算它们的空闲时间idle
     // key只会在pool不满或者空闲时间大于pool里最小的时，才会进入pool，然后从pool中选择空闲时间最大的key淘汰掉
     // 注意选择并且最终进入了pool的key，需要从existkey删除
     int evictionPoolPopulate(){
@@ -168,7 +183,7 @@ private:
     }
 
 public:
-    cache(int capacity): capacity(capacity), samples(SAMPLES), size(0), firstSample(true) {
+    cache(int capacity): capacity(capacity), samples(SAMPLES), size(0), firstSample(true),time_interval(0) {
         for(int i=0;i<EVPOOL_SIZE;i++){
             EvictionPoolLRU[i].time = 0;
         }
@@ -206,7 +221,13 @@ public:
             insert(key,val);
         }else{
             //缓存已满, evict
-            evictionPoolPopulate();
+            // 当pool内部时间差大于一个阈值时，说明有些过时，此时才重新采样
+            if(time_interval == 0 || time_interval>INTERVAL_THERSHOLD || EvictionPoolLRU[0].key==KeyType()){
+                evictionPoolPopulate();
+                updateTimeInterval();
+            }
+
+            
             //倒序遍历
             for(int i=EVPOOL_SIZE-1;i>=0;i--){
                 if(EvictionPoolLRU[i].key == KeyType()) continue;
